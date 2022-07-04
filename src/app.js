@@ -26,14 +26,25 @@ app.options('*', cors());
 
 app.use('/api/swimmingpool/v1',routes);
 
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.json({ error: err });
+app.use((req, res) => {
+    res.status(404).send({ url: `${req.path} not found` });
 });
 
 app.listen(PORT, async () => {
     await connectMongoDb();
     console.log(`Server is running on port ${PORT}`);
 });
+
+process.on('unhandledRejection', error => {
+    throw error
+})
+   
+process.on('uncaughtException', error => {
+    logError(error)
+
+    if (!isOperationalError(error)) {
+        process.exit(1)
+    }
+})
 
 module.exports = app;

@@ -2,6 +2,7 @@ const User = require("../models/users.model");
 const jwt = require('jsonwebtoken');
 const { attachTokenToRes } = require("../helpers/jwt");
 const {validationResult} = require('express-validator');
+const { sendSuccess, sendError } = require("../libs/response");
 
 class AuthController {
     register = async (req,res) => {
@@ -21,9 +22,9 @@ class AuthController {
                 newuser = await User.create({name,password,phone,role: 'admin'})
             }
             newuser = await User.create({name,password,phone})
-            res.status(200).send({newuser})
+            sendSuccess(res, {newuser} )
         } catch (error) {
-            res.status(500).send({error: error.message})
+            sendError(res, 500, error.message, error)
         }
     }
 
@@ -44,15 +45,15 @@ class AuthController {
                 return res.status(404).send({error: "password not correct"});
             }
             attachTokenToRes(res,user);
-            res.status(200).send({message: "Login successful"})
+            sendSuccess(res, "Login successful!")
         } catch (error) {
-            res.status(500).send({error: error.message})
+            sendError(res, 500, error.message, error)
         }
     }
 
     logout(req,res) {
         res.clearCookie('accessToken')
-        res.status(200).send({message: "Logout Success"}) 
+        sendSuccess(res, "Logout successful!") 
     }
 }
 
